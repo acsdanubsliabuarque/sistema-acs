@@ -1,15 +1,8 @@
-# sistema-acs
-// ===============================
-// CONFIGURAÇÃO DO BANCO
-// ===============================
 const DB_NAME = "acs_db";
-const DB_VERSION = 2;
+const DB_VERSION = 1;
 
 let db;
 
-// ===============================
-// INICIALIZAR BANCO
-// ===============================
 function initDB() {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
@@ -17,67 +10,47 @@ function initDB() {
     request.onupgradeneeded = function (event) {
       db = event.target.result;
 
-      // ===============================
-      // DOMICÍLIOS
-      // ===============================
       if (!db.objectStoreNames.contains("domicilios")) {
         const domicilios = db.createObjectStore("domicilios", {
           keyPath: "id",
           autoIncrement: true
         });
-
         domicilios.createIndex("endereco", "endereco", { unique: false });
       }
 
-      // ===============================
-      // MORADORES
-      // ===============================
       if (!db.objectStoreNames.contains("moradores")) {
         const moradores = db.createObjectStore("moradores", {
           keyPath: "id",
           autoIncrement: true
         });
-
         moradores.createIndex("nome", "nome", { unique: false });
         moradores.createIndex("cpf", "cpf", { unique: false });
         moradores.createIndex("cns", "cns", { unique: false });
         moradores.createIndex("domicilioId", "domicilioId", { unique: false });
       }
 
-      // ===============================
-      // VISITAS
-      // ===============================
       if (!db.objectStoreNames.contains("visitas")) {
         const visitas = db.createObjectStore("visitas", {
           keyPath: "id",
           autoIncrement: true
         });
-
         visitas.createIndex("domicilioId", "domicilioId", { unique: false });
         visitas.createIndex("data", "data", { unique: false });
       }
 
-      // ===============================
-      // RECEITAS
-      // ===============================
       if (!db.objectStoreNames.contains("receitas")) {
         const receitas = db.createObjectStore("receitas", {
           keyPath: "id",
           autoIncrement: true
         });
-
         receitas.createIndex("moradorId", "moradorId", { unique: false });
       }
 
-      // ===============================
-      // PENDÊNCIAS
-      // ===============================
       if (!db.objectStoreNames.contains("pendencias")) {
         const pendencias = db.createObjectStore("pendencias", {
           keyPath: "id",
           autoIncrement: true
         });
-
         pendencias.createIndex("moradorId", "moradorId", { unique: false });
         pendencias.createIndex("resolvida", "resolvida", { unique: false });
       }
@@ -94,9 +67,6 @@ function initDB() {
   });
 }
 
-// ===============================
-// VALIDAÇÕES
-// ===============================
 function validarDados(store, dados) {
   if (store === "domicilios") {
     if (!dados.endereco || !dados.numero) {
@@ -121,9 +91,6 @@ function validarDados(store, dados) {
   }
 }
 
-// ===============================
-// ADD (CRIAR)
-// ===============================
 function add(storeName, data) {
   return new Promise((resolve, reject) => {
     try {
@@ -145,9 +112,6 @@ function add(storeName, data) {
   });
 }
 
-// ===============================
-// GET ALL
-// ===============================
 function getAll(storeName) {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(storeName, "readonly");
@@ -160,9 +124,6 @@ function getAll(storeName) {
   });
 }
 
-// ===============================
-// GET BY ID
-// ===============================
 function getById(storeName, id) {
   return new Promise((resolve, reject) => {
     const tx = db.transaction(storeName, "readonly");
@@ -175,9 +136,6 @@ function getById(storeName, id) {
   });
 }
 
-// ===============================
-// UPDATE
-// ===============================
 function update(storeName, data) {
   return new Promise((resolve, reject) => {
     try {
@@ -198,11 +156,7 @@ function update(storeName, data) {
   });
 }
 
-// ===============================
-// DELETE (COM SEGURANÇA)
-// ===============================
 async function remove(storeName, id) {
-  // BLOQUEIOS IMPORTANTES
   if (storeName === "moradores") {
     const pendencias = await getAll("pendencias");
     const receitas = await getAll("receitas");
