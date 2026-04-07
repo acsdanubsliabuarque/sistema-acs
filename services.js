@@ -1,12 +1,3 @@
-// ===============================
-// SERVICES.JS
-// Camada de regras de negócio
-// Depende de: db.js
-// ===============================
-
-// ===============================
-// UTILITÁRIOS
-// ===============================
 function nowIso() {
   return new Date().toISOString();
 }
@@ -126,10 +117,6 @@ function generateVisitDurationMinutes(horaInicio, horaFim) {
 
   return Math.floor(ms / (1000 * 60));
 }
-
-// ===============================
-// LEITURAS AUXILIARES
-// ===============================
 async function getDomicilioById(id) {
   return await getById("domicilios", id);
 }
@@ -150,9 +137,6 @@ async function getVisitaById(id) {
   return await getById("visitas", id);
 }
 
-// ===============================
-// DOMICÍLIOS
-// ===============================
 async function criarDomicilio(dados = {}) {
   const payload = {
     endereco: safeString(dados.endereco),
@@ -236,9 +220,6 @@ async function domicilioTemResponsavel(domicilioId) {
   return moradores.some(m => m.domicilioId === domicilioId && m.ehResponsavel === true);
 }
 
-// ===============================
-// MORADORES
-// ===============================
 async function existeOutroResponsavelNoDomicilio(domicilioId, moradorIdIgnorar = null) {
   const moradores = await getAll("moradores");
 
@@ -398,9 +379,6 @@ async function excluirMorador(id) {
   return await remove("moradores", id);
 }
 
-// ===============================
-// RECEITAS
-// ===============================
 async function criarReceita(dados = {}) {
   const moradorId = dados.moradorId;
   if (!moradorId) throw new Error("Receita precisa de um morador");
@@ -464,9 +442,6 @@ function isReceitaVencida(receita) {
   return dias > getReceitaValidadeDias(receita.tipo);
 }
 
-// ===============================
-// VISITAS
-// ===============================
 const VISITA_DRAFT_KEY = "acs_visita_em_andamento";
 
 function salvarVisitaEmAndamento(payload) {
@@ -569,9 +544,6 @@ async function getUltimaVisitaPorDomicilio(domicilioId) {
   return visitas.length ? visitas[0] : null;
 }
 
-// ===============================
-// PENDÊNCIAS
-// ===============================
 async function criarPendencia(dados = {}) {
   const moradorId = dados.moradorId;
   if (!moradorId) throw new Error("Pendência precisa de um morador");
@@ -663,9 +635,6 @@ function getPendenciaDiasAbertos(pendencia) {
   return Math.floor((fim.getTime() - inicio.getTime()) / (1000 * 60 * 60 * 24));
 }
 
-// ===============================
-// ENRIQUECIMENTO DE DADOS
-// ===============================
 async function enriquecerPendencias() {
   const pendencias = await listarPendencias();
   const moradores = await getAll("moradores");
@@ -698,9 +667,6 @@ async function enriquecerMoradores() {
   });
 }
 
-// ===============================
-// ALERTAS
-// ===============================
 async function gerarAlertas() {
   const alertas = [];
 
@@ -724,7 +690,7 @@ async function gerarAlertas() {
     };
   }
 
-  // Domicílio sem responsável
+
   for (const d of domicilios) {
     const temResponsavel = moradores.some(m => m.domicilioId === d.id && m.ehResponsavel);
     if (!temResponsavel) {
@@ -736,7 +702,7 @@ async function gerarAlertas() {
     }
   }
 
-  // Receitas vencidas
+
   for (const r of receitas) {
     const morador = moradores.find(m => m.id === r.moradorId);
     if (!morador) continue;
@@ -751,7 +717,6 @@ async function gerarAlertas() {
     }
   }
 
-  // Pendências abertas
   for (const p of pendencias) {
     if (p.resolvida) continue;
 
@@ -768,7 +733,7 @@ async function gerarAlertas() {
     });
   }
 
-  // Sem visita recente
+
   for (const m of moradores) {
     const grupoPrioritario = m.crianca || m.idoso || m.acamado || m.gestante;
     if (!grupoPrioritario) continue;
@@ -802,9 +767,6 @@ async function gerarAlertas() {
   return alertas;
 }
 
-// ===============================
-// DASHBOARD
-// ===============================
 async function obterResumoDashboard() {
   const domicilios = await getAll("domicilios");
   const moradores = await getAll("moradores");
