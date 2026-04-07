@@ -8,32 +8,50 @@
   <h1>Teste do sistema ACS</h1>
   <div id="status">Carregando...</div>
 
-  <script src="db.js"></script>
-  <script src="services.js"></script>
-
   <script>
+    function setStatus(msg) {
+      document.getElementById("status").innerText = msg;
+    }
+
+    window.onerror = function (msg, src, line, col) {
+      setStatus("❌ Erro JavaScript: " + msg + " | arquivo: " + src + " | linha: " + line);
+    };
+  </script>
+
+  <script src="db.js"></script>
+  <script>
+    if (typeof initDB !== "function") {
+      setStatus("❌ db.js carregou errado ou initDB não existe");
+    } else {
+      setStatus("✅ db.js carregado");
+    }
+  </script>
+
+  <script src="services.js"></script>
+  <script>
+    if (typeof criarDomicilio !== "function") {
+      setStatus("❌ services.js carregou errado ou criarDomicilio não existe");
+    } else {
+      setStatus("✅ services.js carregado");
+    }
+
     initDB()
       .then(async () => {
-        try {
-          const id = await criarDomicilio({
-            endereco: "Rua Teste",
-            numero: "123",
-            complemento: "",
-            referencia: "Perto da praça",
-            microarea: "01",
-            telefone: "11999999999"
-          });
+        setStatus("✅ Banco abriu. Testando criação...");
 
-          document.getElementById("status").innerText =
-            "✅ db.js e services.js funcionando. Domicílio criado com ID: " + id;
-        } catch (erro) {
-          document.getElementById("status").innerText =
-            "❌ services.js carregou, mas deu erro: " + erro.message;
-        }
+        const id = await criarDomicilio({
+          endereco: "Rua Teste",
+          numero: "123",
+          complemento: "",
+          referencia: "Perto da praça",
+          microarea: "01",
+          telefone: "11999999999"
+        });
+
+        setStatus("✅ Tudo funcionando. Domicílio de teste criado com ID: " + id);
       })
       .catch((erro) => {
-        document.getElementById("status").innerText =
-          "❌ Erro ao iniciar banco: " + erro;
+        setStatus("❌ Erro ao iniciar/testar banco: " + erro);
       });
   </script>
 </body>
