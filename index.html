@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Teste ACS</title>
+</head>
+<body>
+  <h1>Teste do sistema ACS</h1>
+  <div id="status">Carregando...</div>
+
+  <script src="db.js"></script>
+  <script src="services.js"></script>
+
+  <script>
+    initDB()
+      .then(async () => {
+        try {
+          const id = await criarDomicilio({
+            endereco: "Rua Teste",
+            numero: "123",
+            complemento: "",
+            referencia: "Perto da praça",
+            microarea: "01",
+            telefone: "11999999999"
+          });
+
+          document.getElementById("status").innerText =
+            "✅ db.js e services.js funcionando. Domicílio criado com ID: " + id;
+        } catch (erro) {
+          document.getElementById("status").innerText =
+            "❌ services.js carregou, mas deu erro: " + erro.message;
+        }
+      })
+      .catch((erro) => {
+        document.getElementById("status").innerText =
+          "❌ Erro ao iniciar banco: " + erro;
+      });
+  </script>
+</body>
+</html>
